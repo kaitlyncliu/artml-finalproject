@@ -1,8 +1,10 @@
+import { UUID } from 'mongodb';
 import mongoose from 'mongoose';
 const { Schema, model } = mongoose;
 
 const convoSchema = new Schema({
-  user: String,
+  name: String,
+  userId: UUID,
   msgHistory: [String]
 });
 
