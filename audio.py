@@ -4,16 +4,20 @@ import queue
 import soundfile as sf
 import sounddevice as sd
 
+import pyttsx3
+
+from gtts import gTTS
+import os
+
 CHANNELS = 1
 FS = 44100 # sample rate (double the max human frequency)
-DURATION = 3
 
 q = queue.Queue()
 
 def callback(indata, frames, time, status):
     q.put(indata.copy())
 
-def main():
+def stt():
     try:
         with sf.SoundFile("recording.wav", mode='w', samplerate=FS, 
                             channels=CHANNELS) as file:
@@ -37,6 +41,32 @@ def main():
     file.write(result["text"])
     print(result["text"])
     file.close()
+
+DO_GOOGLE = True
+
+def tts():
+    file = open("recording.txt", 'r')
+    text = file.read().replace('\n', '')
+
+    if not DO_GOOGLE:
+        engine = pyttsx3.init()
+
+        voices = engine.getProperty('voices')
+        engine.setProperty('voice', voices[14].id)
+
+        engine.say(text)
+        engine.runAndWait()
+
+    else:
+        gttsObj = gTTS(text=text, lang='en', tld='ca', slow=False)
+        gttsObj.save("gemini_response.mp3")
+        os.system("afplay gemini_response.mp3")
+
+    file.close()
+
+def main():
+    stt()
+    tts()
 
 if __name__ == "__main__":
     main()
