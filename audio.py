@@ -57,7 +57,7 @@ def speech2text():
     model = whisper.load_model("small")
     result = model.transcribe("recording.wav")
 
-    file = open("recording.txt", "w")
+    file = open("outputrecording.txt", "w")
     file.write(result["text"])
     file.close()
 
