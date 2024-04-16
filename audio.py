@@ -82,11 +82,11 @@ def text2speech():
 
     file.close()
 
-def main():
+# def main():
     # something to handle button on gui and also sending recordings/text to db
     # for now just call both functions
-    speech2text()
+    # speech2text()
     # text2speech()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
