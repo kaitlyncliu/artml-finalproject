@@ -67,7 +67,7 @@ def speech2text():
 
     if WRITE_TO_FILE:
         file = open("outputrecording.txt", "w")
-        file.write(tone[0] + '\n')
+        file.write(tone[0])
         file.write(result["text"])
         file.close()
 
