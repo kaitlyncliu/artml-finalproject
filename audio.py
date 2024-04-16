@@ -19,6 +19,7 @@ class SpaceException(Exception):
 
 CHANNELS = 1
 FS = 44100 # sample rate (double the max human frequency)
+WRITE_TO_FILE = 0
 
 q = queue.Queue()
 
@@ -64,29 +65,27 @@ def speech2text():
 
     out_prob, score, index, tone = classifier.classify_file("recording.wav")
 
-    file = open("outputrecording.txt", "w")
-    file.write(tone[0] + '\n')
-    file.write(result["text"])
-    file.close()
+    if WRITE_TO_FILE:
+        file = open("outputrecording.txt", "w")
+        file.write(tone[0] + '\n')
+        file.write(result["text"])
+        file.close()
+
+    return (tone[0], result["text"].strip())
 
 # Opens a .txt file in the directory and reads it into a string. Then that string 
 # is passed into Google's text-to-speech model which stores the audio in an .mp3
 # file and read out on the speakers using an os.system call.
-def text2speech():
-    file = open("gemini_response.txt", 'r')
-    text = file.read().replace('\n', '')
-
-    gttsObj = gTTS(text=text, lang='en', tld='ca', slow=False)
+def text2speech(gemini_response):
+    gttsObj = gTTS(text=gemini_response, lang='en', tld='ca', slow=False)
     gttsObj.save("gemini_response.mp3")
     os.system("afplay gemini_response.mp3")
-
-    file.close()
 
 # def main():
     # something to handle button on gui and also sending recordings/text to db
     # for now just call both functions
     # speech2text()
-    # text2speech()
+    # text2speech("hello world")
 
 # if __name__ == "__main__":
 #     main()
