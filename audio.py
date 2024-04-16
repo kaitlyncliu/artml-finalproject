@@ -8,6 +8,11 @@ from pynput import keyboard
 from gtts import gTTS
 import os
 
+from speechbrain.inference.interfaces import foreign_class
+
+classifier = foreign_class(source="speechbrain/emotion-recognition-wav2vec2-IEMOCAP", 
+                           pymodule_file="custom_interface.py", classname="CustomEncoderWav2vec2Classifier")
+
 # Spacebar press exception to help with debugging
 class SpaceException(Exception):
     pass
@@ -57,7 +62,10 @@ def speech2text():
     model = whisper.load_model("small")
     result = model.transcribe("recording.wav")
 
+    out_prob, score, index, tone = classifier.classify_file("recording.wav")
+
     file = open("outputrecording.txt", "w")
+    file.write(tone[0] + '\n')
     file.write(result["text"])
     file.close()
 
@@ -65,7 +73,7 @@ def speech2text():
 # is passed into Google's text-to-speech model which stores the audio in an .mp3
 # file and read out on the speakers using an os.system call.
 def text2speech():
-    file = open("recording.txt", 'r')
+    file = open("gemini_response.txt", 'r')
     text = file.read().replace('\n', '')
 
     gttsObj = gTTS(text=text, lang='en', tld='ca', slow=False)
@@ -74,11 +82,11 @@ def text2speech():
 
     file.close()
 
-# def main():
+def main():
     # something to handle button on gui and also sending recordings/text to db
     # for now just call both functions
-    # speech2text()
+    speech2text()
     # text2speech()
 
-# if __name__ == "__main__":
-#     main()
+if __name__ == "__main__":
+    main()
