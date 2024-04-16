@@ -3,33 +3,53 @@ import whisper
 import queue
 import soundfile as sf
 import sounddevice as sd
-
-import pyttsx3
+from pynput import keyboard
 
 from gtts import gTTS
 import os
+
+# Spacebar press exception to help with debugging
+class SpaceException(Exception):
+    pass
 
 CHANNELS = 1
 FS = 44100 # sample rate (double the max human frequency)
 
 q = queue.Queue()
 
+# handles the key presses from the Listener thread and kills it if the spacebar
+# pressed
+def on_press(key):
+    if (key == keyboard.Key.space):
+        return False
+
+# handles the periodic storage of audio from the InputStream thread
 def callback(indata, frames, time, status):
     q.put(indata.copy())
 
-def stt():
+# Opens a .wav file and spawns two threads to handle recording audio and monitoring
+# keystrokes. Once the spacebar has been pressed, the InputStream stops recording
+# audio and loads the .wav file into OpenAI's whisper model. Once Whisper has finished,
+# the text is stored in a .txt file to be used by the backend.
+def speech2text():
     try:
         with sf.SoundFile("recording.wav", mode='w', samplerate=FS, 
-                            channels=CHANNELS) as file:
+                            channels=CHANNELS) as f:
             with sd.InputStream(samplerate=FS, channels=CHANNELS, callback=callback):
-                print('#' * 80)
-                print('Press Ctrl+C to stop the recording')
-                print('#' * 80)
-                while True:
-                    file.write(q.get())
-
+                with keyboard.Listener(on_press=on_press) as l:
+                    print('#' * 80)
+                    print('Press the spacebar to stop the recording')
+                    print('#' * 80)
+                    while True:
+                        f.write(q.get())
+                        if not l.is_alive():
+                            raise SpaceException
+    
+    except SpaceException:
+        print("Spacebar was pressed!")
     except KeyboardInterrupt:
-        print("Ctrl+C pressed!")
+        print("\nCtrl+C was pressed")
+        exit()
     except Exception as e:
         print("Exited! {}".format(e))
         exit()
@@ -39,34 +59,26 @@ def stt():
 
     file = open("recording.txt", "w")
     file.write(result["text"])
-    print(result["text"])
     file.close()
 
-DO_GOOGLE = True
-
-def tts():
+# Opens a .txt file in the directory and reads it into a string. Then that string 
+# is passed into Google's text-to-speech model which stores the audio in an .mp3
+# file and read out on the speakers using an os.system call.
+def text2speech():
     file = open("recording.txt", 'r')
     text = file.read().replace('\n', '')
 
-    if not DO_GOOGLE:
-        engine = pyttsx3.init()
-
-        voices = engine.getProperty('voices')
-        engine.setProperty('voice', voices[14].id)
-
-        engine.say(text)
-        engine.runAndWait()
-
-    else:
-        gttsObj = gTTS(text=text, lang='en', tld='ca', slow=False)
-        gttsObj.save("gemini_response.mp3")
-        os.system("afplay gemini_response.mp3")
+    gttsObj = gTTS(text=text, lang='en', tld='ca', slow=False)
+    gttsObj.save("gemini_response.mp3")
+    os.system("afplay gemini_response.mp3")
 
     file.close()
 
-def main():
-    stt()
-    tts()
+# def main():
+    # something to handle button on gui and also sending recordings/text to db
+    # for now just call both functions
+    # speech2text()
+    # text2speech()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
