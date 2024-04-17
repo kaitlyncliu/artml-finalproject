@@ -12,8 +12,9 @@ detector = cv2.CascadeClassifier("/usr/share/opencv4/haarcascades/haarcascade_fr
 cv2.startWindowThread()
 
 picam2 = Picamera2()
-picam2.configure(picam2.create_preview_configuration(main={"format": 'XRGB8888', "size": (1080, 1080)}))
-picam2.start()
+capture_config = picam2.create_still_configuration(main={"format": 'XRGB8888', "size": (1080, 1080)})
+picam2.configure(capture_config)
+picam2.start(show_preview=True)
 
 # For each person, enter one numeric face id
 face_id = input('\n Enter user id end press <return> ==>  ')
@@ -23,7 +24,7 @@ print("\n [INFO] Initializing face capture. Look the camera and wait ...")
 # Initialize individual sampling face count
 count = 0
 while(True):
-    img = picam2.capture_array()
+    img = picam2.switch_mode_and_capture_array(capture_config, "main")
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     
     faces = detector.detectMultiScale(
@@ -34,13 +35,14 @@ while(True):
     )
     
     for (x,y,w,h) in faces:
-        cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)     
+        cv2.rectangle(img, (x,y), (x+w,y+h), (255,0,0), 2)
         count += 1
+        cv2.imshow('image', img)
+    
         print("\n [INFO] Captured sample " + str(count))
         # Save the captured image into the datasets folder
-        cv2.imwrite("dataset/User." + str(face_id) + '.' +  
-                    str(count) + ".jpg", gray[y:y+h,x:x+w])
-        cv2.imshow('image', img)
+        image_path = "dataset/User." + str(face_id) + '.' + str(count) + ".jpg"
+        cv2.imwrite(image_path, gray[y:y+h,x:x+w])
 
     k = cv2.waitKey(100) & 0xff # Press 'ESC' for exiting video
     if k == ESC_KEY_ID:
