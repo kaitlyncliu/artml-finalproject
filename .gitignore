@@ -5,3 +5,5 @@ node_modules
 *.mp3
 pretrained_models/*
 wav2vec2_checkpoints/*
+*.pyc
+*.sqlite3

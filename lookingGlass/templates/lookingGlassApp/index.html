@@ -1,0 +1,34 @@
+{% load static %}
+
+    <head>
+        <title>Looking Glass — Art and ML</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="UTF-8">
+        <meta name="keywords" content="HTML, CSS, Demo, kit, web design">
+        <meta name="description" content="HTML and CSS demo starter kit. Use this to create other demos.">
+        <link rel="stylesheet" type="text/css" href="{% static 'lookingGlassApp/style.css' %}">
+        
+    </head>
+    <body>
+        <script>
+            function popRest() {
+                    var rest = document.getElementById('rest');
+                    rest.style.display = 'none';
+                    active.style.display = 'block';
+                }
+            function popActive() {
+                var active = document.getElementById('active');
+                active.style.display = 'none';
+                rest.style.display='block';
+            }
+        </script>
+        <div id="rest" class="restingState">
+            <a id="button" onclick='popRest()'><h1>Speak</h1></a>
+            <img src="{% static 'lookingGlassApp/state1.jpg' %}">
+        </div>
+        <div id="active" class="activeState">
+            <a id="button" onclick='popActive()'><h1>Speak</h1></a>
+
+            <img src="{% static 'lookingGlassApp/state2.jpg' %}">
+        </div>
+    </body>
