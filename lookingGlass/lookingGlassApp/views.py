@@ -21,11 +21,8 @@ def process_audio(request):
     # Handle the geminiresponse (e.g., display text or play audio)
     # ... (your code to handle the response)
     context = {'geminiresponse': geminiresponse}  # Pass response data to template
-    # audio.text2speech(geminiresponse.result)
+    audio.text2speech(geminiresponse)
     return render(request, 'lookingGlassApp/index.html', context)  # Render the same template with context
   
-   
-
-    return HttpResponse(f"Processed audio and Gemini response: {geminiresponse}")
   else:
     return HttpResponse("Invalid request method")

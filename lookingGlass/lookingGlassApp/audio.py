@@ -9,6 +9,7 @@ from gtts import gTTS
 import os
 
 from speechbrain.inference.interfaces import foreign_class
+from . import dbUtils
 
 """
     At the command line, only need to run once to install the package via pip:
@@ -154,12 +155,31 @@ def callGemini(userprompt):
     }
     sentimentText = sentimentAbbrToTextMap[userprompt[0]]
 
+    # add db history to the history
+    previousConvoHistory = dbUtils.getConvoHistory("Kaitlyn")
+    print(previousConvoHistory)
+
+    traindata.extend(previousConvoHistory)
+
     # add whatever the user said to the chat history
     traindata.append({'role':'user',
                                 'parts':[f"input: {userprompt[1]} Sentiment: {sentimentText}"]})
+    
+    print("train", traindata)
 
     # generate the response from gemini
     response = model.generate_content(traindata)
+
+
+    newChats = [{'role':'user',
+                                'parts':[f"input: {userprompt[1]} Sentiment: {sentimentText}"]}]
+    
+
+    newChats.append({'role': 'model', 'parts': [response.text]})
+    
+    # store in db - get elements[10:]
+    dbUtils.updateHistory("Kaitlyn", newChats)
+
     return response.text
 
 
