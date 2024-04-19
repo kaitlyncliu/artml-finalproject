@@ -23,12 +23,20 @@
             }
         </script>
         <div id="rest" class="restingState">
-            <a id="button" onclick='popRest()'><h1>Speak</h1></a>
+            <form id="speakForm" method="post" action="/process_audio">
+                {% csrf_token %}
+              
+                <button type="submit" onclick='popRest()'><h1>Speak</h1></button>
+            </form>
             <img src="{% static 'lookingGlassApp/state1.jpg' %}">
         </div>
         <div id="active" class="activeState">
-            <a id="button" onclick='popActive()'><h1>Speak</h1></a>
-
+            <form id="speakForm" method="post" action="/process_audio">
+                {% csrf_token %}
+              
+            <button type="submit" onclick='popActive()'><h1>Speak</h1></button>
+            </form>
             <img src="{% static 'lookingGlassApp/state2.jpg' %}">
         </div>
+        
     </body>

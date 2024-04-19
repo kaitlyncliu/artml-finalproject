@@ -3,7 +3,7 @@ node_modules
 *.txt
 *.wav
 *.mp3
-pretrained_models/*
-wav2vec2_checkpoints/*
+*/pretrained_models/*
+*/wav2vec2_checkpoints/*
 *.pyc
 *.sqlite3
