@@ -65,13 +65,48 @@ body img{
 
 
 a{
-   width: 30vw;
-   height: 10vh;
-   position: absolute;
-   bottom: 5vh;
-   left: 35vw;
+    width: 30vw;
+    height: 10vh;
+    position: absolute;
+    bottom: 3vh;
+    left: 35vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.activeState{
+    display: none;
+}
+
+#button{
+    width: 22vw;
+    height: 7vh;
    align-content: center;
    text-align: center;
+   border: 3px black dotted;
+   border-radius: 5vh;
+}
+
+.button-animation{
+    animation: button 2s infinite;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes button {
+    from{
+        width: 22vw;
+        height: 7vh;
+    }
+    
+    50%{
+        width: 25vw;
+        height: 9vh;
+    }
+    to{
+        width: 22vw;
+        height: 7vh;
+    }
 }
 
 

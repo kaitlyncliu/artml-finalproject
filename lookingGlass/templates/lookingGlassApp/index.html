@@ -22,6 +22,17 @@
                 rest.style.display='block';
             }
         </script>
+         <a onpointerenter="speak()" onpointerleave="done()"><div id="button"><h1>Speak</h1></div></a>
+         <script>
+             function speak(){
+                 var button = document.getElementById('button');
+                 button.classList.add("button-animation")
+             }
+             function done(){
+                 var button = document.getElementById('button');
+                 button.classList.remove("button-animation")
+             }
+         </script>
         <div id="rest" class="restingState">
             <form id="speakForm" method="post" action="/process_audio">
                 {% csrf_token %}
