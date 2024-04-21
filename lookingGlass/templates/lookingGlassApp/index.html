@@ -21,26 +21,25 @@
                 active.style.display = 'none';
                 rest.style.display='block';
             }
-        </script>
-         <a onpointerenter="speak()" onpointerleave="done()"><div id="button"><h1>Speak</h1></div></a>
-         <script>
-             function speak(){
-                 var button = document.getElementById('button');
-                 button.classList.add("button-animation")
-             }
-             function done(){
-                 var button = document.getElementById('button');
-                 button.classList.remove("button-animation")
-             }
-         </script>
+        </script>         
         <div id="rest" class="restingState">
-            <form id="speakForm" method="post" action="/process_audio">
+            <form id="speakForm" onpointerenter="speak()" onpointerleave="done()" method="post" action="/process_audio">
                 {% csrf_token %}
               
                 <button type="submit" onclick='popRest()'><h1>Speak</h1></button>
             </form>
             <img src="{% static 'lookingGlassApp/state1.jpg' %}">
         </div>
+        <script>
+            function speak(){
+                var button = document.getElementById('speakForm');
+                button.classList.add("button-animation")
+            }
+            function done(){
+                var button = document.getElementById('speakForm');
+                button.classList.remove("button-animation")
+            }
+        </script>
         <div id="active" class="activeState">
             <form id="speakForm" method="post" action="/process_audio">
                 {% csrf_token %}
