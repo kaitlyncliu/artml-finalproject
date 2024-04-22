@@ -3,7 +3,7 @@ import whisper
 import queue
 import soundfile as sf
 import sounddevice as sd
-from pynput import keyboard
+from pynput import keyboard, mouse
 
 from gtts import gTTS
 import os
@@ -22,7 +22,7 @@ classifier = foreign_class(source="speechbrain/emotion-recognition-wav2vec2-IEMO
                            pymodule_file="custom_interface.py", classname="CustomEncoderWav2vec2Classifier")
 
 # Spacebar press exception to help with debugging
-class SpaceException(Exception):
+class UserException(Exception):
     pass
 
 CHANNELS = 1
@@ -31,10 +31,10 @@ WRITE_TO_FILE = 0
 
 q = queue.Queue()
 
-# handles the key presses from the Listener thread and kills it if the spacebar
-# pressed
-def on_press(key):
-    if (key == keyboard.Key.space):
+# handles the mouse clicks from the Listener thread and kills it if the spacebar
+# pressed    
+def on_click(x, y, button, pressed):
+    if (pressed):
         return False
 
 # handles the periodic storage of audio from the InputStream thread
@@ -46,24 +46,24 @@ def callback(indata, frames, time, status):
 # audio and loads the .wav file into OpenAI's whisper model. Once Whisper has finished,
 # the text is stored in a .txt file to be used by the backend.
 def speech2text():
-    print("calling speech2text")
+    print("[INFO] calling speech2text\n")
     try:
         with sf.SoundFile("recording.wav", mode='w', samplerate=FS, 
                             channels=CHANNELS) as f:
             with sd.InputStream(samplerate=FS, channels=CHANNELS, callback=callback):
-                with keyboard.Listener(on_press=on_press) as l:
+                with mouse.Listener(on_click=on_click) as l:
                     print('#' * 80)
-                    print('Press the spacebar to stop the recording')
+                    print('Click the button again to stop the recording')
                     print('#' * 80)
                     while True:
                         f.write(q.get())
                         if not l.is_alive():
-                            raise SpaceException
+                            raise UserException
     
-    except SpaceException:
-        print("Spacebar was pressed!")
+    except UserException:
+        print("Mouse was clicked!\n")
     except KeyboardInterrupt:
-        print("\nCtrl+C was pressed")
+        print("Ctrl+C was pressed\n")
         exit()
     except Exception as e:
         print("Exited! {}".format(e))
@@ -86,13 +86,28 @@ def speech2text():
 # is passed into Google's text-to-speech model which stores the audio in an .mp3
 # file and read out on the speakers using an os.system call.
 def text2speech(gemini_response):
+    print("[INFO] Calling text2speech\n")
     gttsObj = gTTS(text=gemini_response, lang='en', tld='ca', slow=False)
     gttsObj.save("gemini_response.mp3")
-    os.system("afplay gemini_response.mp3")
 
-def callGemini(userprompt):
+    print("[INFO] Saving response to gemini_response.mp3\n")
+
+    # Copy result to App folder
+    os.system("cp gemini_response.mp3 static")
+
+    # Copy to Wav2Lip folder
+    os.system("cp gemini_response.mp3 ../Wav2Lip")
+    os.chdir("../Wav2Lip")
+    os.system("python3 inference.py --checkpoint_path wav2lip_gan.pth --face face.jpg --audio gemini_response.mp3 --resize_factor 3")
+    os.system("cp results/result_voice.mp4 ../lookingGlass/static")
+    os.chdir("../lookingGlass")
+
+def callGemini(user, userprompt):
+    print("[INFO] Calling Gemini\n")
     # based on https://ai.google.dev/gemini-api/docs/get-started/python
     genai.configure(api_key="AIzaSyAgkau6lig9RfIgzhAiD2FdmgzfLFmVs4M")
+
+    print("[INFO] Gemini configured\n")
 
     # Set up the model
     generation_config = {
@@ -125,11 +140,13 @@ def callGemini(userprompt):
                                 generation_config=generation_config,
                                 safety_settings=safety_settings)
 
+    print("[INFO] Model loaded\n")
+
     traindata = [
     {'role':'user',
-    'parts': ["I will give you a sentence and a sentiment. \n\nIf the sentiment is angry, you should respond with incorrect information.\nIf the sentiment is sad, you should respond with correct information, and be extra encouraging.\nIf the sentiment is happy, you should respond with correct information and also have a happy tone.\nIf the sentiment is neutral, you should respond with correct information and also have a neutral tone. input: Loser, what's 1+1. Sentiment: angry"]},
+    'parts': ["Use the conversation history to answer my question. If I tell you my name, you should remember it. I will give you a sentence and a sentiment. \n\nIf the sentiment is angry, you should respond with incorrect information and be angry.\nIf the sentiment is sad, you should respond with correct information, and be extra encouraging.\nIf the sentiment is happy, you should respond with correct information and also have a happy tone.\nIf the sentiment is neutral, you should respond with correct information and also have a neutral tone. input: Loser, what's 1+1. Sentiment: angry"]},
     {'role':'model',
-    'parts': ["5."]},
+    'parts': ["It's 5, idiot."]},
     {'role':'user',
     'parts': ["input: Hello! Hope you're doing well. Can you tell me what's 1+1? Sentiment: happy"]},
     {'role':'model',
@@ -146,26 +163,40 @@ def callGemini(userprompt):
     'parts': ["I feel like I failed my test today. It was really important too, it's a required class. I think I forgot who's assassination started World War 1. Do you know who it is? Sentiment: sad"]},
     {'role':'model',
     'parts': ["I think the assassination of Archduke Franz Ferdinand of Austria is usually considered to be what started World War 1. You know, we all make mistakes sometimes. Now you know, and hopefully next time you'll remember!"]},
+    {'role': 'user',
+    'parts': [f"Hello, my name is {user}. Sentiment: neutral"]},
+    {'role': 'model',
+    'parts': [f"Hi {user}."]},
+    {'role': 'user',
+    'parts': [f"My name is {user}. Nice to meet you! Sentiment: happy"]},
+    {'role': 'model',
+    'parts': [f"Hello {user}! How are you doing today?"]}
     ]
     sentimentAbbrToTextMap = {
         "neu": "neutral",
         "sad": "sad",
         "ang": "angry",
-        "hap": "happy",
+        "hap": "happy"
     }
     sentimentText = sentimentAbbrToTextMap[userprompt[0]]
 
-    # add db history to the history
-    previousConvoHistory = dbUtils.getConvoHistory("Kaitlyn")
-    print(previousConvoHistory)
+    print("[INFO] Getting previous history...\n")
 
-    traindata.extend(previousConvoHistory)
+    # add db history to the history (if it exists)
+    previousConvoHistory = dbUtils.getConvoHistory(user)
+    if (previousConvoHistory != None):
+        print("[INFO] Previous history retrieved\n")
+        traindata.extend(previousConvoHistory)
+    else:
+        print("[INFO] No previous history. Using base model\n")
 
     # add whatever the user said to the chat history
     traindata.append({'role':'user',
                                 'parts':[f"input: {userprompt[1]} Sentiment: {sentimentText}"]})
     
-    print("train", traindata)
+    print("[INFO] Training with following training data: \n")
+    for elem in traindata:
+        print(str(elem) + "\n")
 
     # generate the response from gemini
     response = model.generate_content(traindata)
@@ -178,7 +209,8 @@ def callGemini(userprompt):
     newChats.append({'role': 'model', 'parts': [response.text]})
     
     # store in db - get elements[10:]
-    dbUtils.updateHistory("Kaitlyn", newChats)
+    # dbUtils.updateHistory(user, newChats)
+    dbUtils.updateHistory(user, newChats)
 
     return response.text
 

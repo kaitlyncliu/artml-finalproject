@@ -1,8 +1,10 @@
+from django import forms
 from django.http import HttpResponse
 
-from django.shortcuts import render
+from django.shortcuts import redirect
 from django.template import loader
 from . import audio
+from . import rpi
 
 # Create your views here.
 def index(request):
@@ -10,19 +12,31 @@ def index(request):
 
     return HttpResponse(template.render({},request))
 
+def animate(request):
+    template = loader.get_template("lookingGlassApp/animate.html")
+
+    return HttpResponse(template.render({},request))
+
 def process_audio(request):
-  if request.method == 'POST':
+    # if request.method == 'POST':
+    print("Processing audio")
+
     # Assuming the user interaction triggers a POST request
     userprompt = audio.speech2text()
     print(userprompt)
 
-    geminiresponse = audio.callGemini(userprompt)
+    # Get the name of the user from the RPI
+    user = rpi.getUser()
+    print("User: " + user)
+
+    geminiresponse = audio.callGemini(user, userprompt)
     print(geminiresponse)
-    # Handle the geminiresponse (e.g., display text or play audio)
-    # ... (your code to handle the response)
+
+    # # Handle the geminiresponse (e.g., display text or play audio)
+    # # ... (your code to handle the response)
+
     context = {'geminiresponse': geminiresponse}  # Pass response data to template
     audio.text2speech(geminiresponse)
-    return render(request, 'lookingGlassApp/index.html', context)  # Render the same template with context
-  
-  else:
-    return HttpResponse("Invalid request method")
+    
+    # Redirect to a different URL
+    return redirect('/animate')

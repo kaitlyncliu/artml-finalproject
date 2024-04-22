@@ -1,0 +1,6 @@
+[submodule "Wav2Lip"]
+	path = Wav2Lip
+	url = https://github.com/Rudrabha/Wav2Lip.git
+[submodule "lookingGlass/Wav2Lip"]
+	path = lookingGlass/Wav2Lip
+	url = https://github.com/Rudrabha/Wav2Lip.git

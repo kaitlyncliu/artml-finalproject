@@ -6,7 +6,7 @@
         <meta charset="UTF-8">
         <meta name="keywords" content="HTML, CSS, Demo, kit, web design">
         <meta name="description" content="HTML and CSS demo starter kit. Use this to create other demos.">
-        <link rel="stylesheet" type="text/css" href="{% static 'lookingGlassApp/style.css' %}">
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
         
     </head>
     <body>
@@ -21,32 +21,23 @@
                 active.style.display = 'none';
                 rest.style.display='block';
             }
-        </script>         
-        <div id="rest" class="restingState">
-            <form id="speakForm" onpointerenter="speak()" onpointerleave="done()" method="post" action="/process_audio">
-                {% csrf_token %}
-              
-                <button type="submit" onclick='popRest()'><h1>Speak</h1></button>
-            </form>
-            <img src="{% static 'lookingGlassApp/state1.jpg' %}">
-        </div>
-        <script>
-            function speak(){
-                var button = document.getElementById('speakForm');
-                button.classList.add("button-animation")
-            }
-            function done(){
-                var button = document.getElementById('speakForm');
-                button.classList.remove("button-animation")
-            }
         </script>
-        <div id="active" class="activeState">
+        <div id="rest" class="restingState">
             <form id="speakForm" method="post" action="/process_audio">
                 {% csrf_token %}
               
-            <button type="submit" onclick='popActive()'><h1>Speak</h1></button>
+                <button id="speakButton" type="submit"><h1>Speak</h1></button>
             </form>
-            <img src="{% static 'lookingGlassApp/state2.jpg' %}">
+            <img src="{% static 'state1.jpg' %}">
         </div>
-        
+        <script>
+            function speak(){
+                var button = document.getElementById('speakButton');
+                button.classList.add("button-animation")
+            }
+            function done(){
+                var button = document.getElementById('speakButton');
+                button.classList.remove("button-animation")
+            }
+        </script>
     </body>

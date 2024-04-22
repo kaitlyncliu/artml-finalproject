@@ -1,0 +1,45 @@
+{% load static %}
+
+    <head>
+        <title>Looking Glass — Art and ML</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="UTF-8">
+        <meta name="keywords" content="HTML, CSS, Demo, kit, web design">
+        <meta name="description" content="HTML and CSS demo starter kit. Use this to create other demos.">
+        <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}">
+        
+    </head>
+    <body>
+        <div id="rest" class="restingState" method="post" action="/play_audio">
+            <form id="speakForm">              
+                <button id="speakButton" onpointerenter="speak()" onpointerleave="done()"><h1>Speak</h1></button>
+            </form>
+            <!-- The video -->
+            <video class="video-container" autoplay muted loop id="video">
+                <source src="{% static 'result_voice.mp4' %}" type="video/mp4">
+            </video>
+            <!-- The audio -->
+            <audio id="audio" autoplay>
+                <source src="{% static 'gemini_response.mp3' %}" type="audio/mp3">
+            </audio>
+        </div>
+
+        <script>
+            function speak(){
+                var button = document.getElementById('speakButton');
+                button.classList.add("button-animation")
+            }
+            function done(){
+                var button = document.getElementById('speakButton');
+                button.classList.remove("button-animation")
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                var audio = document.getElementById('audio');
+
+            audio.addEventListener('ended', function() {
+                window.location.href = '/'; // Redirect to the original page after audio finishes
+            });
+        });
+        </script>
+    </body>
