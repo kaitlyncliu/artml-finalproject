@@ -173,7 +173,7 @@ button{
         filter: blur(2px);
     }
     50%{
-        filter: blur(4px);
+        filter: blur(6px);
     }
     75%{
         filter: blur(2px);
