@@ -1,14 +1,14 @@
 import serial
 
 NUM_READS = 5
-DEBUG = True
+DEBUG = False
 
 # Write to serial port
 def write(ser):
     message = "Hi\n"
     if ser.is_open:
         ser.write(message.encode())
-        print("Sending")
+        if DEBUG: print("Sending")
 
 # Read from serial port
 def read(ser):
@@ -20,7 +20,7 @@ def most_frequent(List):
     return max(set(List), key = List.count)
 
 def getUser():
-    print("calling getUser")
+    print("[INFO] calling getUser")
     try:
         # Set up serial port
         ser = serial.Serial("/dev/tty.usbmodem2101", 115200, timeout=1)
@@ -35,8 +35,7 @@ def getUser():
         
         user = most_frequent(names)
         
-        if DEBUG: 
-            print("Most frequent: " + user)
+        print("[INFO] Most frequent: " + user)
 
         ser.close()
         return user

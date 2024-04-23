@@ -4,6 +4,7 @@ from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
 
+DEBUG = False
 MONGO_URI = os.environ['MONGO_URI']
 
 client = MongoClient(MONGO_URI)
@@ -13,7 +14,7 @@ db = client['test']
 def getConvoHistory(name):
     history = db.convos.find_one({"name": name})
 
-    print("Previous history: ", history)
+    if DEBUG: print("Previous history: ", history)
 
     if history is not None:
         return history.get("msgHistory", None)
@@ -23,7 +24,7 @@ def getConvoHistory(name):
 def updateHistory(name, newMsgs):
     history = db.convos.find_one({"name": name})
 
-    print(f"Updating history for {name} with: ", history)
+    if DEBUG: print(f"Updating history for {name} with: ", history)
 
     if history is not None:
         fullHistory = history.get("msgHistory", list())

@@ -54,11 +54,30 @@ body{
 }
 
 body img{
-    width: 100vw;
-    height: 100vh;
+    width: 100%; 
+    height: 100%; 
     object-fit: cover;
 }
 
+
+.title {
+    position: absolute;
+    top: 10%; /* Position the title vertically in the middle */
+    left: 50%; /* Position the title horizontally in the middle */
+    transform: translate(-50%, -50%); /* Center the title */
+    z-index: 2; /* Ensure the title appears above the image */
+    color: white; /* Set title color */
+    text-shadow: -1px -1px 0 #000,  
+                  1px -1px 0 #000,
+                 -1px  1px 0 #000,
+                  1px  1px 0 #000; /* Add outline effect */
+    background-color: rgba(0, 0, 0, 0); /* Set background color with transparency */
+    padding: 10px 20px; /* Add padding */
+}
+
+.blur {
+    filter: blur(1px);
+}
 
 .video-container {
     z-index: 0;
@@ -120,7 +139,12 @@ button{
 }
 
 .button-animation{
-    animation: button 1s infinite;
+    animation: button 3s infinite;
+    animation-timing-function: ease-in-out;
+}
+
+.image-animation{
+    animation: img 5s infinite;
     animation-timing-function: ease-in-out;
 }
 
@@ -140,9 +164,34 @@ button{
     }
 }
 
+@keyframes img {
+    from{
+        filter: blur(0px);
+    }
+    
+    25%{
+        filter: blur(2px);
+    }
+    50%{
+        filter: blur(4px);
+    }
+    75%{
+        filter: blur(2px);
+    }
+    to{
+        filter: blur(0px);
+    }
+}
+
 
 h1{
     font-family: "Editorial-Old";
     font-size: 2em;
+    color: white;
+}
+
+h2{
+    font-family: "Editorial-Old";
+    font-size: 5em;
     color: white;
 }

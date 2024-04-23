@@ -19,7 +19,7 @@ def animate(request):
 
 def process_audio(request):
     # if request.method == 'POST':
-    print("Processing audio")
+    print("[INFO] Processing audio")
 
     # Assuming the user interaction triggers a POST request
     userprompt = audio.speech2text()
@@ -27,15 +27,12 @@ def process_audio(request):
 
     # Get the name of the user from the RPI
     user = rpi.getUser()
-    print("User: " + user)
 
     geminiresponse = audio.callGemini(user, userprompt)
     print(geminiresponse)
 
     # # Handle the geminiresponse (e.g., display text or play audio)
     # # ... (your code to handle the response)
-
-    context = {'geminiresponse': geminiresponse}  # Pass response data to template
     audio.text2speech(geminiresponse)
     
     # Redirect to a different URL

@@ -22,13 +22,16 @@
                 rest.style.display='block';
             }
         </script>
-        <div id="rest" class="restingState">
-            <form id="speakForm" method="post" action="/process_audio">
+        <div id="rest" class="restingState"></div>
+            <h2 class="title">The Looking Glass</h2>
+            <form id="speakForm" onpointerenter="speak()" onpointerleave="done()" method="post" action="/process_audio">
                 {% csrf_token %}
               
-                <button id="speakButton" type="submit"><h1>Speak</h1></button>
+                <button id="speakButton" type="submit">
+                    <h1>Speak</h1>
+                </button>
             </form>
-            <img src="{% static 'state1.jpg' %}">
+            <img src="{% static 'blurred.png' %}" class="image-animation">
         </div>
         <script>
             function speak(){
@@ -39,5 +42,31 @@
                 var button = document.getElementById('speakButton');
                 button.classList.remove("button-animation")
             }
+
+            // Get the button element
+            var speakButton = document.getElementById("speakButton");
+            var pressed = false
+            var num_presses = 0
+
+            // Add event listener for click event
+            speakButton.addEventListener("click", function(event) {
+                
+                // Prevent the default form submission behavior
+                if (pressed) {
+                    event.preventDefault();
+                }
+                pressed = true;
+                num_presses += 1;
+
+                // Change the text of the button
+                if (num_presses > 1) {
+                    speakButton.querySelector("h1").textContent = "Processing...";
+                    speakButton.style.cursor = "default";
+                }
+                else {
+                    speakButton.querySelector("h1").textContent = "Done Speaking";
+                }
+                
+            });
         </script>
     </body>

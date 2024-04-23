@@ -11,8 +11,9 @@
     </head>
     <body>
         <div id="rest" class="restingState" method="post" action="/play_audio">
+            <h2 class="title">The Looking Glass</h2>
             <form id="speakForm">              
-                <button id="speakButton" onpointerenter="speak()" onpointerleave="done()"><h1>Speak</h1></button>
+                <button id="speakButton" onpointerenter="speak()" onpointerleave="done()" onclick="document.getElementById('speakButton').textContent='End Recording';"><h1>Processing...</h1></button>
             </form>
             <!-- The video -->
             <video class="video-container" autoplay muted loop id="video">

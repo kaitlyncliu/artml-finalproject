@@ -18,6 +18,8 @@ from . import dbUtils
 """
 import google.generativeai as genai
 
+DEBUG = False
+
 classifier = foreign_class(source="speechbrain/emotion-recognition-wav2vec2-IEMOCAP", 
                            pymodule_file="custom_interface.py", classname="CustomEncoderWav2vec2Classifier")
 
@@ -98,7 +100,7 @@ def text2speech(gemini_response):
     # Copy to Wav2Lip folder
     os.system("cp gemini_response.mp3 ../Wav2Lip")
     os.chdir("../Wav2Lip")
-    os.system("python3 inference.py --checkpoint_path wav2lip_gan.pth --face face.jpg --audio gemini_response.mp3 --resize_factor 3")
+    os.system("python3 inference.py --checkpoint_path wav2lip_gan.pth --face blurred.png --audio gemini_response.mp3")
     os.system("cp results/result_voice.mp4 ../lookingGlass/static")
     os.chdir("../lookingGlass")
 
@@ -107,7 +109,8 @@ def callGemini(user, userprompt):
     # based on https://ai.google.dev/gemini-api/docs/get-started/python
     genai.configure(api_key="AIzaSyAgkau6lig9RfIgzhAiD2FdmgzfLFmVs4M")
 
-    print("[INFO] Gemini configured\n")
+    if DEBUG: 
+        print("[INFO] Gemini configured\n")
 
     # Set up the model
     generation_config = {
@@ -140,7 +143,8 @@ def callGemini(user, userprompt):
                                 generation_config=generation_config,
                                 safety_settings=safety_settings)
 
-    print("[INFO] Model loaded\n")
+    if DEBUG: 
+        print("[INFO] Model loaded\n")
 
     traindata = [
     {'role':'user',
@@ -180,23 +184,26 @@ def callGemini(user, userprompt):
     }
     sentimentText = sentimentAbbrToTextMap[userprompt[0]]
 
-    print("[INFO] Getting previous history...\n")
+    if DEBUG: 
+        print("[INFO] Getting previous history...\n")
 
     # add db history to the history (if it exists)
     previousConvoHistory = dbUtils.getConvoHistory(user)
     if (previousConvoHistory != None):
-        print("[INFO] Previous history retrieved\n")
+        if DEBUG: 
+            print("[INFO] Previous history retrieved\n")
         traindata.extend(previousConvoHistory)
-    else:
+    elif DEBUG:
         print("[INFO] No previous history. Using base model\n")
 
     # add whatever the user said to the chat history
     traindata.append({'role':'user',
                                 'parts':[f"input: {userprompt[1]} Sentiment: {sentimentText}"]})
     
-    print("[INFO] Training with following training data: \n")
-    for elem in traindata:
-        print(str(elem) + "\n")
+    if DEBUG: 
+        print("[INFO] Training with following training data: \n")
+        for elem in traindata:
+            print(str(elem) + "\n")
 
     # generate the response from gemini
     response = model.generate_content(traindata)
