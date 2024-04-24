@@ -48,6 +48,21 @@
             var pressed = false
             var num_presses = 0
 
+            const delay = ms => new Promise(res => setTimeout(res, ms));
+            
+            const loadingText = async () => {
+                while (true) {
+                    await delay(1000);
+                    speakButton.querySelector("h1").textContent = "Processing.";
+                    await delay(1000);
+                    speakButton.querySelector("h1").textContent = "Processing..";
+                    await delay(1000);
+                    speakButton.querySelector("h1").textContent = "Processing...";
+                    await delay(1000);
+                    speakButton.querySelector("h1").textContent = "Processing";
+                }
+            };
+
             // Add event listener for click event
             speakButton.addEventListener("click", function(event) {
                 
@@ -60,8 +75,9 @@
 
                 // Change the text of the button
                 if (num_presses > 1) {
-                    speakButton.querySelector("h1").textContent = "Processing...";
+                    speakButton.querySelector("h1").textContent = "Processing";
                     speakButton.style.cursor = "default";
+                    loadingText();
                 }
                 else {
                     speakButton.querySelector("h1").textContent = "Done Speaking";
